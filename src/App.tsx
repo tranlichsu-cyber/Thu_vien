@@ -96,6 +96,7 @@ export default function App() {
   const [selectedStory, setSelectedStory] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('stories');
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Document/Material management
   const [materials, setMaterials] = useState<Material[]>(() => {
@@ -186,7 +187,7 @@ export default function App() {
     else if (newCategory === 'Truyện sách lật') icon = 'BookOpen';
 
     const newStory: Story = {
-      id: Date.now(),
+      id: Date.now() + Math.random(),
       title: newTitle || (storyMethod === 'file' && storyFile ? storyFile.name : 'Truyện mới'),
       category: newCategory,
       icon,
@@ -231,7 +232,7 @@ export default function App() {
     const materialLink = docMethod === 'file' && uploadedFile ? uploadedFile.data : (docLink || '#');
     
     const newMaterial: Material = {
-      id: Date.now(),
+      id: Date.now() + Math.random(),
       title: docTitle || (docMethod === 'file' && uploadedFile ? uploadedFile.name : 'Tài liệu không tên'),
       type: docType,
       grade: docType === 'video' ? 0 : docGrade,
@@ -372,6 +373,8 @@ export default function App() {
             <input 
               type="text" 
               placeholder="Tìm kiếm truyện, tài liệu..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-transparent border-none outline-none text-sm w-full"
             />
           </div>
@@ -392,6 +395,56 @@ export default function App() {
 
         {/* Content Area */}
         <div className="p-8 flex-1 overflow-y-auto space-y-8 scroll-smooth">
+          {/* Featured Banner - News/Featured Update */}
+          {activeTab === 'stories' && !searchQuery && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-700 min-h-[220px] shadow-2xl shadow-blue-500/20 group"
+            >
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+              <div className="relative z-10 p-10 flex flex-col justify-center h-full max-w-2xl">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black text-white uppercase tracking-widest border border-white/30">
+                    Nổi bật tuần này
+                  </span>
+                  <div className="flex gap-1">
+                    {[1,2,3,4,5].map(i => <Star key={i} size={10} className="fill-yellow-400 text-yellow-400" />)}
+                  </div>
+                </div>
+                <h2 className="text-4xl font-black text-white mb-4 leading-tight">
+                  Khám phá Thế giới <br /> 
+                  <span className="text-yellow-400">Kỳ Diệu</span> qua từng trang sách
+                </h2>
+                <p className="text-blue-100 text-sm font-medium mb-6 line-clamp-2 max-w-md">
+                  Chào mừng các em đến với Thư viện Số Lý Tự Trọng. Nơi tri thức bắt đầu và trí tưởng tượng bay xa!
+                </p>
+                <div className="flex gap-4">
+                  <button 
+                    onClick={() => setActiveTab('stories')}
+                    className="bg-white text-blue-600 px-6 py-3 rounded-xl font-bold text-sm shadow-xl hover:bg-blue-50 transition-all active:translate-y-1"
+                  >
+                    Đọc truyện ngay
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('docs')}
+                    className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-6 py-3 rounded-xl font-bold text-sm hover:bg-white/20 transition-all"
+                  >
+                    Tài liệu học tập
+                  </button>
+                </div>
+              </div>
+              <div className="absolute right-0 top-0 bottom-0 w-1/3 hidden lg:block">
+                <img 
+                  src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=800"
+                  className="w-full h-full object-cover mix-blend-overlay group-hover:scale-110 transition-transform duration-1000"
+                  alt="Featured"
+                />
+                <div className="absolute inset-0 bg-gradient-to-l from-transparent to-indigo-700"></div>
+              </div>
+            </motion.div>
+          )}
+
           {/* Quick Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
@@ -452,8 +505,11 @@ export default function App() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {stories.filter(s => selectedCategory === 'All' || s.category === selectedCategory).map((story) => (
-                    <motion.div
+                  {stories
+                    .filter(s => selectedCategory === 'All' || s.category === selectedCategory)
+                    .filter(s => s.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map((story) => (
+                      <motion.div
                       key={story.id}
                       layout
                       whileHover={{ y: -4 }}
@@ -565,8 +621,14 @@ export default function App() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gb-border">
-                        {materials.filter(m => m.grade === selectedGrade).length > 0 ? (
-                          materials.filter(m => m.grade === selectedGrade).map((doc) => (
+                        {materials
+                          .filter(m => m.grade === selectedGrade)
+                          .filter(m => m.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                          .length > 0 ? (
+                          materials
+                            .filter(m => m.grade === selectedGrade)
+                            .filter(m => m.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                            .map((doc) => (
                             <tr key={doc.id} className="hover:bg-slate-50 transition-colors">
                               <td className="px-6 py-4">
                                 <p className="text-sm font-bold text-slate-800">{doc.title}</p>
@@ -634,7 +696,10 @@ export default function App() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {materials.filter(m => m.type === 'video').map((vid) => (
+                  {materials
+                    .filter(m => m.type === 'video')
+                    .filter(m => m.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map((vid) => (
                     <div key={vid.id} className="bg-white rounded-2xl border border-gb-border shadow-sm overflow-hidden group relative">
                       {isAdmin && (
                         <button 
