@@ -28,7 +28,8 @@ import {
   Star,
   Zap,
   Leaf,
-  Globe
+  Globe,
+  FileText
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -39,7 +40,7 @@ interface Story {
   category: string;
   icon: string;
   image: string;
-  type: 'modal' | 'link';
+  type: 'modal' | 'link' | 'pdf' | 'flipbook';
   link: string;
   color: string;
 }
@@ -55,7 +56,9 @@ interface Material {
 
 // --- Constants ---
 const INITIAL_STORIES: Story[] = [
-  { id: 1, title: 'Sự Tích Hồ Gươm', category: 'Cổ tích', icon: 'Star', image: 'https://images.unsplash.com/photo-1599708153386-62e2d3639963?auto=format&fit=crop&q=80&w=400', type: 'link', link: 'https://gemini.google.com/share/c5d023fb21ed', color: 'orange' }
+  { id: 1, title: 'Sự Tích Hồ Gươm', category: 'Cổ tích', icon: 'Star', image: 'https://images.unsplash.com/photo-1599708153386-62e2d3639963?auto=format&fit=crop&q=80&w=400', type: 'link', link: 'https://gemini.google.com/share/c5d023fb21ed', color: 'orange' },
+  { id: 2, title: 'Dế Mèn Phiêu Lưu Ký (PDF)', category: 'Truyện PDF', icon: 'Leaf', image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400', type: 'link', link: '#', color: 'emerald' },
+  { id: 3, title: 'Hoàng Tử Bé (Sách lật)', category: 'Truyện sách lật', icon: 'BookOpen', image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=400', type: 'link', link: '#', color: 'sky' }
 ];
 
 const INITIAL_MATERIALS: Material[] = [
@@ -64,7 +67,7 @@ const INITIAL_MATERIALS: Material[] = [
   { id: 3, title: 'Video Sự tích Hồ Gươm (Kể chuyện)', type: 'video', grade: 0, link: 'https://gemini.google.com/share/c5d023fb21ed', date: '07/05/2024' },
 ];
 
-const CATEGORIES = ['Cổ tích', 'Văn học VN', 'Khoa học', 'Văn học nước ngoài'];
+const CATEGORIES = ['Cổ tích', 'Văn học VN', 'Khoa học', 'Văn học nước ngoài', 'Truyện PDF', 'Truyện sách lật'];
 const COLORS = ['emerald', 'pink', 'yellow', 'sky', 'orange'];
 
 // --- Components ---
@@ -75,6 +78,8 @@ const IconRenderer = ({ name, className }: { name: string, className?: string })
     case 'Star': return <Star className={className} />;
     case 'Zap': return <Zap className={className} />;
     case 'Globe': return <Globe className={className} />;
+    case 'FileText': return <FileText className={className} />;
+    case 'BookOpen': return <BookOpen className={className} />;
     default: return <BookOpen className={className} />;
   }
 };
@@ -136,6 +141,9 @@ export default function App() {
   const [newLink, setNewLink] = useState('');
   const [newImage, setNewImage] = useState('');
   const [newCategory, setNewCategory] = useState('Cổ tích');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [storyMethod, setStoryMethod] = useState<'link' | 'file'>('link');
+  const [storyFile, setStoryFile] = useState<{ name: string; data: string } | null>(null);
 
   // Add material form state
   const [docTitle, setDocTitle] = useState('');
@@ -167,20 +175,24 @@ export default function App() {
   const handleAddStory = (e: React.FormEvent) => {
     e.preventDefault();
     const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    const finalLink = storyMethod === 'file' && storyFile ? storyFile.data : (newLink || '#');
+    
     let icon = 'BookOpen';
     if (newCategory === 'Cổ tích') icon = 'Star';
     else if (newCategory === 'Khoa học') icon = 'Zap';
     else if (newCategory === 'Văn học VN') icon = 'Leaf';
     else if (newCategory === 'Văn học nước ngoài') icon = 'Globe';
+    else if (newCategory === 'Truyện PDF') icon = 'Leaf';
+    else if (newCategory === 'Truyện sách lật') icon = 'BookOpen';
 
     const newStory: Story = {
       id: Date.now(),
-      title: newTitle,
+      title: newTitle || (storyMethod === 'file' && storyFile ? storyFile.name : 'Truyện mới'),
       category: newCategory,
       icon,
       image: newImage || `https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400`,
-      type: newLink ? 'link' : 'modal',
-      link: newLink,
+      type: newCategory === 'Truyện PDF' ? 'pdf' : (newCategory === 'Truyện sách lật' ? 'flipbook' : (finalLink ? 'link' : 'modal')),
+      link: finalLink,
       color
     };
     setStories([...stories, newStory]);
@@ -189,6 +201,23 @@ export default function App() {
     setNewLink('');
     setNewImage('');
     setNewCategory('Cổ tích');
+    setStoryFile(null);
+    setStoryMethod('link');
+  };
+
+  const handleStoryFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setStoryFile({
+          name: file.name,
+          data: event.target?.result as string
+        });
+        if (!newTitle) setNewTitle(file.name);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const deleteStory = (id: number) => {
@@ -388,18 +417,42 @@ export default function App() {
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
                   <h2 className="text-2xl font-extrabold text-slate-800">Kho Truyện Kỳ Diệu</h2>
-                  {isAdmin && (
-                    <button 
-                      onClick={() => setAddStoryModalOpen(true)}
-                      className="flex items-center gap-2 bg-gb-primary text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all"
+                  <div className="flex gap-2">
+                    {isAdmin && (
+                      <button 
+                        onClick={() => setAddStoryModalOpen(true)}
+                        className="flex items-center gap-2 bg-gb-primary text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all"
+                      >
+                        <PlusCircle size={18} /> Thêm Truyện
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setSelectedCategory('All')}
+                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                      selectedCategory === 'All' ? 'bg-gb-primary text-white shadow-md' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    Tất cả
+                  </button>
+                  {CATEGORIES.map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                        selectedCategory === cat ? 'bg-gb-primary text-white shadow-md' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
+                      }`}
                     >
-                      <PlusCircle size={18} /> Thêm Truyện
+                      {cat}
                     </button>
-                  )}
+                  ))}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {stories.map((story) => (
+                  {stories.filter(s => selectedCategory === 'All' || s.category === selectedCategory).map((story) => (
                     <motion.div
                       key={story.id}
                       layout
@@ -763,6 +816,23 @@ export default function App() {
               </div>
 
               <form onSubmit={handleAddStory} className="space-y-4">
+                <div className="flex bg-slate-100 p-1 rounded-xl mb-4">
+                  <button 
+                    type="button"
+                    onClick={() => setStoryMethod('link')}
+                    className={`flex-1 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${storyMethod === 'link' ? 'bg-white shadow-sm text-gb-primary' : 'text-slate-400'}`}
+                  >
+                    Dùng liên kết
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setStoryMethod('file')}
+                    className={`flex-1 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${storyMethod === 'file' ? 'bg-white shadow-sm text-emerald-500' : 'text-slate-400'}`}
+                  >
+                    Tải tệp PDF
+                  </button>
+                </div>
+
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase">Tên Truyện *</label>
                   <input 
@@ -770,19 +840,44 @@ export default function App() {
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
                     required 
+                    placeholder="VD: Dế Mèn Phiêu Lưu Ký"
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:border-gb-primary focus:bg-white outline-none transition-all text-sm"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-500 uppercase">Liên kết (URL)</label>
-                  <input 
-                    type="url" 
-                    value={newLink}
-                    onChange={(e) => setNewLink(e.target.value)}
-                    placeholder="https://..." 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:border-gb-primary focus:bg-white outline-none transition-all text-sm"
-                  />
-                </div>
+
+                {storyMethod === 'link' ? (
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Liên kết (Link đọc)</label>
+                    <input 
+                      type="url" 
+                      value={newLink}
+                      onChange={(e) => setNewLink(e.target.value)}
+                      placeholder="https://..." 
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:border-gb-primary focus:bg-white outline-none transition-all text-sm"
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Chọn tệp PDF truyện</label>
+                    <div className="relative">
+                      <input 
+                        type="file" 
+                        onChange={handleStoryFileChange}
+                        accept=".pdf"
+                        className="opacity-0 absolute inset-0 w-full h-full cursor-pointer z-10"
+                      />
+                      <div className="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl px-4 py-6 flex flex-col items-center justify-center gap-2 group-hover:border-emerald-500 transition-all">
+                        <PlusCircle size={24} className="text-slate-300" />
+                        <span className="text-[10px] font-bold text-slate-400">
+                          {storyFile ? storyFile.name : 'Nhấn để chọn tệp PDF'}
+                        </span>
+                        {storyFile && (
+                          <span className="text-[10px] text-emerald-500 font-bold uppercase mt-1">Tệp đã sẵn sàng</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase">Ảnh bìa (URL)</label>
                   <input 
