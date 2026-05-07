@@ -58,17 +58,9 @@ interface Material {
 }
 
 // --- Constants ---
-const INITIAL_STORIES: Story[] = [
-  { id: 1, title: 'Sự Tích Hồ Gươm', category: 'Cổ tích', icon: 'Star', image: 'https://images.unsplash.com/photo-1599708153386-62e2d3639963?auto=format&fit=crop&q=80&w=400', type: 'link', link: 'https://gemini.google.com/share/c5d023fb21ed', color: 'orange' },
-  { id: 2, title: 'Dế Mèn Phiêu Lưu Ký (PDF)', category: 'Truyện PDF', icon: 'Leaf', image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400', type: 'pdf', link: 'https://www.adobe.com/support/products/enterprise/knowledgecenter/whitepapers/pdf/modern_publishing_with_pdf.pdf', color: 'emerald' },
-  { id: 3, title: 'Hoàng Tử Bé (Sách lật)', category: 'Truyện sách lật', icon: 'BookOpen', image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=400', type: 'flipbook', link: 'https://mag.fliphtml5.com/quku/tmfk/', color: 'sky' }
-];
+const INITIAL_STORIES: Story[] = [];
 
-const INITIAL_MATERIALS: Material[] = [
-  { id: 1, title: 'Giáo án Tiếng Việt 1 - Tuần 1', type: 'doc', grade: 1, link: '#', date: '01/05/2024' },
-  { id: 2, title: 'Bài giảng PPT Toán 2 - Phép cộng', type: 'ppt', grade: 2, link: '#', date: '02/05/2024' },
-  { id: 3, title: 'Video Sự tích Hồ Gươm (Kể chuyện)', type: 'video', grade: 0, link: 'https://gemini.google.com/share/c5d023fb21ed', date: '07/05/2024' },
-];
+const INITIAL_MATERIALS: Material[] = [];
 
 const CATEGORIES = ['Cổ tích', 'Văn học VN', 'Khoa học', 'Văn học nước ngoài', 'Truyện PDF', 'Truyện sách lật'];
 const COLORS = ['emerald', 'pink', 'yellow', 'sky', 'orange'];
@@ -94,7 +86,7 @@ export default function App() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [addStoryModalOpen, setAddStoryModalOpen] = useState(false);
   const [stories, setStories] = useState<Story[]>(() => {
-    const saved = localStorage.getItem('library_stories');
+    const saved = localStorage.getItem('library_stories_v3');
     return saved ? JSON.parse(saved) : INITIAL_STORIES;
   });
   const [selectedStory, setSelectedStory] = useState<string | null>(null);
@@ -104,16 +96,16 @@ export default function App() {
 
   // Document/Material management
   const [materials, setMaterials] = useState<Material[]>(() => {
-    const saved = localStorage.getItem('library_materials');
+    const saved = localStorage.getItem('library_materials_v2');
     return saved ? JSON.parse(saved) : INITIAL_MATERIALS;
   });
 
   useEffect(() => {
-    localStorage.setItem('library_stories', JSON.stringify(stories));
+    localStorage.setItem('library_stories_v3', JSON.stringify(stories));
   }, [stories]);
 
   useEffect(() => {
-    localStorage.setItem('library_materials', JSON.stringify(materials));
+    localStorage.setItem('library_materials_v2', JSON.stringify(materials));
   }, [materials]);
   const [addDocModalOpen, setAddDocModalOpen] = useState(false);
 
