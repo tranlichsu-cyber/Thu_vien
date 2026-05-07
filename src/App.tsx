@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { sanityClient, fetchStories, fetchMaterials } from './lib/sanity';
 import { 
   BookOpen, 
   Menu, 
@@ -29,7 +30,9 @@ import {
   Zap,
   Leaf,
   Globe,
-  FileText
+  FileText,
+  Download,
+  Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -87,6 +90,7 @@ const IconRenderer = ({ name, className }: { name: string, className?: string })
 export default function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [addStoryModalOpen, setAddStoryModalOpen] = useState(false);
   const [stories, setStories] = useState<Story[]>(() => {
@@ -122,6 +126,25 @@ export default function App() {
   useEffect(() => {
     // Increment visit on mount
     setStats(prev => ({ ...prev, visits: prev.visits + 1 }));
+
+    // Fetch from Sanity if available
+    const loadSanityData = async () => {
+      if (!sanityClient) return;
+      setIsLoading(true);
+      try {
+        const [cmsStories, cmsMaterials] = await Promise.all([
+          fetchStories(),
+          fetchMaterials()
+        ]);
+        if (cmsStories) setStories(prev => [...prev, ...cmsStories]);
+        if (cmsMaterials) setMaterials(prev => [...prev, ...cmsMaterials]);
+      } catch (error) {
+        console.error("Sanity fetch error:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadSanityData();
   }, []);
 
   useEffect(() => {
@@ -398,6 +421,12 @@ export default function App() {
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border-2 border-white rounded-full flex items-center justify-center text-[8px] text-white">3</span>
             </div>
             <div className="h-8 w-[1px] bg-slate-200"></div>
+            {isLoading && (
+              <div className="flex items-center gap-2 text-gb-primary">
+                <Loader2 className="animate-spin" size={18} />
+                <span className="text-[10px] font-bold uppercase">Đang đồng bộ CMS</span>
+              </div>
+            )}
             <div className="text-right hidden sm:block">
               <p className="text-xs font-bold text-gb-text-dark">Thư Viện Lý Tự Trọng</p>
               <p className="text-[10px] text-gb-text-muted capitalize">
