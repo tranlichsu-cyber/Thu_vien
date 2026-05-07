@@ -58,41 +58,9 @@ interface Material {
 }
 
 // --- Constants ---
-const INITIAL_STORIES: Story[] = [
-  // Cổ tích Việt Nam
-  { id: 1, title: 'Thạch Sanh', category: 'Cổ tích', icon: 'Star', image: 'https://truyenthieunhi.vn/Uploads/News/thach-sanh.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-co-tich/co-tich-viet-nam/thach-sanh-ly-thong', color: 'orange' },
-  { id: 2, title: 'Sơn Tinh Thủy Tinh', category: 'Cổ tích', icon: 'Star', image: 'https://truyenthieunhi.vn/Uploads/News/son-tinh-thuy-tinh.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-co-tich/co-tich-viet-nam/son-tinh-thuy-tinh', color: 'emerald' },
-  { id: 3, title: 'Sự tích cây vú sữa', category: 'Cổ tích', icon: 'Star', image: 'https://truyenthieunhi.vn/Uploads/News/cay-vu-sua.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-co-tich/co-tich-viet-nam/su-tich-cay-vu-sua', color: 'pink' },
-  { id: 4, title: 'Sự tích Bánh chưng bánh giầy', category: 'Cổ tích', icon: 'Star', image: 'https://truyenthieunhi.vn/Uploads/News/banh-chung-banh-day.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-co-tich/co-tich-viet-nam/su-tich-banh-chung-banh-giay', color: 'yellow' },
-  { id: 5, title: 'Sự tích Mai An Tiêm', category: 'Cổ tích', icon: 'Star', image: 'https://truyenthieunhi.vn/Uploads/News/mai-an-tiem.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-co-tich/co-tich-viet-nam/su-tich-qua-dua-hau', color: 'sky' },
-  
-  // Cổ tích thế giới
-  { id: 6, title: 'Cô bé quàng khăn đỏ', category: 'Văn học nước ngoài', icon: 'Globe', image: 'https://truyenthieunhi.vn/Uploads/News/co-be-quang-khan-do.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-co-tich/co-tich-the-gioi/co-be-quang-khan-do', color: 'orange' },
-  { id: 7, title: 'Ba chú lợn con', category: 'Văn học nước ngoài', icon: 'Globe', image: 'https://truyenthieunhi.vn/Uploads/News/ba-chu-lon-con.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-co-tich/co-tich-the-gioi/ba-chu-lon-con', color: 'emerald' },
-  { id: 8, title: 'Vịt con xấu xí', category: 'Văn học nước ngoài', icon: 'Globe', image: 'https://truyenthieunhi.vn/Uploads/News/vit-con-xau-xi.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-co-tich/co-tich-the-gioi/vit-con-xau-xi', color: 'pink' },
-  { id: 9, title: 'Aladin và cây đèn thần', category: 'Văn học nước ngoài', icon: 'Globe', image: 'https://truyenthieunhi.vn/Uploads/News/aladin.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-co-tich/co-tich-the-gioi/aladin-va-cay-den-than', color: 'yellow' },
-  
-  // Ngụ ngôn / Văn học VN (dùng category Văn học VN cho Ngụ ngôn Việt)
-  { id: 10, title: 'Rùa và Thỏ', category: 'Văn học VN', icon: 'Leaf', image: 'https://truyenthieunhi.vn/Uploads/News/rua-va-tho.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-ngu-ngon/rua-va-tho', color: 'sky' },
-  { id: 11, title: 'Thầy bói xem voi', category: 'Văn học VN', icon: 'Leaf', image: 'https://truyenthieunhi.vn/Uploads/News/thay-boi-xem-voi.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-ngu-ngon/thay-boi-xem-voi', color: 'orange' },
-  { id: 12, title: 'Ěch ngồi đáy giếng', category: 'Văn học VN', icon: 'Leaf', image: 'https://truyenthieunhi.vn/Uploads/News/ech-ngoi-day-gieng.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-ngu-ngon/ech-ngoi-day-gieng', color: 'emerald' },
-  
-  // Khoa học
-  { id: 13, title: 'Tại sao biển lại mặn?', category: 'Khoa học', icon: 'Zap', image: 'https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?auto=format&fit=crop&q=80&w=400', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/10-van-cau-hoi-vi-sao/tai-sao-nuoc-bien-man', color: 'pink' },
-  { id: 14, title: 'Tại sao có sấm sét?', category: 'Khoa học', icon: 'Zap', image: 'https://images.unsplash.com/photo-1472141521881-95d0e87e2e39?auto=format&fit=crop&q=80&w=400', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/10-van-cau-hoi-vi-sao/tai-sao-co-sam-set', color: 'yellow' },
-  
-  // Truyện cười (Thêm category mới hoặc cho vào Văn học VN)
-  { id: 15, title: 'Lợn cưới áo mới', category: 'Văn học VN', icon: 'Leaf', image: 'https://truyenthieunhi.vn/Uploads/News/lon-cuoi-ao-moi.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-cuoi/lon-cuoi-ao-moi', color: 'sky' },
-  { id: 16, title: 'Trạng Quỳnh', category: 'Cổ tích', icon: 'Star', image: 'https://truyenthieunhi.vn/Uploads/News/trang-quynh.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-cuoi/trang-quynh', color: 'orange' },
-  { id: 17, title: 'Cậu bé thông minh', category: 'Cổ tích', icon: 'Star', image: 'https://truyenthieunhi.vn/Uploads/News/cau-be-thong-minh.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-co-tich/co-tich-viet-nam/cau-be-thong-minh', color: 'emerald' },
-  { id: 18, title: 'Nàng Bạch Tuyết và bảy chú lùn', category: 'Văn học nước ngoài', icon: 'Globe', image: 'https://truyenthieunhi.vn/Uploads/News/bach-tuyet.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-co-tich/co-tich-the-gioi/nang-bach-tuyet-va-7-chu-lun', color: 'pink' }
-];
+const INITIAL_STORIES: Story[] = [];
 
-const INITIAL_MATERIALS: Material[] = [
-  { id: 1, title: '10 vạn câu hỏi vì sao - PDF', type: 'doc', grade: 0, link: 'https://truyenthieunhi.vn/truyen-cho-tre/10-van-cau-hoi-vi-sao', date: '07/05/2024' },
-  { id: 2, title: 'Đồng dao cho bé', type: 'doc', grade: 1, link: 'https://truyenthieunhi.vn/truyen-cho-tre/dong-dao-cho-tre-mam-non', date: '07/05/2024' },
-  { id: 3, title: 'Câu đố dân gian', type: 'doc', grade: 2, link: 'https://truyenthieunhi.vn/truyen-cho-tre/cau-do', date: '07/05/2024' }
-];
+const INITIAL_MATERIALS: Material[] = [];
 
 const CATEGORIES = ['Cổ tích', 'Văn học VN', 'Khoa học', 'Văn học nước ngoài', 'Truyện PDF', 'Truyện sách lật'];
 const COLORS = ['emerald', 'pink', 'yellow', 'sky', 'orange'];
@@ -118,7 +86,7 @@ export default function App() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [addStoryModalOpen, setAddStoryModalOpen] = useState(false);
   const [stories, setStories] = useState<Story[]>(() => {
-    const saved = localStorage.getItem('library_stories_v4');
+    const saved = localStorage.getItem('library_stories_v5');
     return saved ? JSON.parse(saved) : INITIAL_STORIES;
   });
   const [selectedStory, setSelectedStory] = useState<string | null>(null);
@@ -128,16 +96,16 @@ export default function App() {
 
   // Document/Material management
   const [materials, setMaterials] = useState<Material[]>(() => {
-    const saved = localStorage.getItem('library_materials_v3');
+    const saved = localStorage.getItem('library_materials_v4');
     return saved ? JSON.parse(saved) : INITIAL_MATERIALS;
   });
 
   useEffect(() => {
-    localStorage.setItem('library_stories_v4', JSON.stringify(stories));
+    localStorage.setItem('library_stories_v5', JSON.stringify(stories));
   }, [stories]);
 
   useEffect(() => {
-    localStorage.setItem('library_materials_v3', JSON.stringify(materials));
+    localStorage.setItem('library_materials_v4', JSON.stringify(materials));
   }, [materials]);
   const [addDocModalOpen, setAddDocModalOpen] = useState(false);
 
