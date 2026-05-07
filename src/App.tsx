@@ -270,8 +270,22 @@ export default function App() {
     }
   };
 
+  // State for PDF Viewer
+  const [pdfViewerOpen, setPdfViewerOpen] = useState(false);
+  const [viewingPdf, setViewingPdf] = useState<{ url: string; title: string } | null>(null);
+
   const handleDownload = (link: string, title: string) => {
     recordInteraction();
+    
+    // Check if it's a PDF and should be viewed in-app
+    const isPdf = link.startsWith('data:application/pdf') || link.toLowerCase().endsWith('.pdf');
+    
+    if (isPdf && !link.includes('download=true')) {
+      setViewingPdf({ url: link, title });
+      setPdfViewerOpen(true);
+      return;
+    }
+
     if (link.startsWith('data:')) {
       const a = document.createElement('a');
       a.href = link;
@@ -514,7 +528,7 @@ export default function App() {
                       layout
                       whileHover={{ y: -4 }}
                       onClick={() => {
-                        if (story.type === 'link') {
+                        if (story.type === 'link' || story.type === 'pdf') {
                           handleDownload(story.link, story.title);
                         } else {
                           handleStoryOpen(story.title);
@@ -536,7 +550,7 @@ export default function App() {
                         <div className="absolute inset-0 bg-gb-sidebar/0 group-hover:bg-gb-sidebar/60 transition-all flex flex-col items-center justify-center p-4">
                           <Rocket className="text-white w-10 h-10 mb-2 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all" />
                           <span className="text-white text-xs font-bold opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all text-center">
-                            {story.type === 'link' ? 'Mở liên kết' : 'Xem nội dung'}
+                            {story.type === 'pdf' ? 'Đọc truyện PDF' : (story.type === 'link' ? 'Mở liên kết' : 'Xem nội dung')}
                           </span>
                         </div>
                       </div>
@@ -1091,6 +1105,73 @@ export default function App() {
                   <button type="submit" className="flex-1 px-6 py-3 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 transition-all text-sm">Lưu Tài Liệu</button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+        {pdfViewerOpen && viewingPdf && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-0 md:p-8">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setPdfViewerOpen(false)}
+              className="absolute inset-0 bg-slate-900/90 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white w-full h-full md:rounded-3xl relative z-10 shadow-2xl flex flex-col overflow-hidden max-w-6xl"
+            >
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500">
+                    <FileText size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-800 line-clamp-1">{viewingPdf.title}</h3>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Chế độ đọc sách số</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => {
+                      const a = document.createElement('a');
+                      a.href = viewingPdf.url;
+                      a.download = viewingPdf.title;
+                      a.click();
+                    }}
+                    className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-xl transition-all"
+                    title="Tải về máy"
+                  >
+                    <Download size={20} />
+                  </button>
+                  <button 
+                    onClick={() => setPdfViewerOpen(false)}
+                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+              </div>
+
+              {/* PDF Content */}
+              <div className="flex-1 bg-slate-100 relative overflow-hidden">
+                <iframe 
+                  src={`${viewingPdf.url}#toolbar=1&navpanes=0&scrollbar=1`}
+                  className="w-full h-full border-none"
+                  title="PDF Viewer"
+                />
+              </div>
+
+              {/* Footer / Controls Note */}
+              <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 flex justify-center">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                  Sử dụng thanh công cụ bên trên để Phóng to, Thu nhỏ và Chuyển trang
+                </p>
+              </div>
             </motion.div>
           </div>
         )}
