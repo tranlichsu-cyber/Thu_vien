@@ -84,13 +84,27 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [addStoryModalOpen, setAddStoryModalOpen] = useState(false);
-  const [stories, setStories] = useState<Story[]>(INITIAL_STORIES);
+  const [stories, setStories] = useState<Story[]>(() => {
+    const saved = localStorage.getItem('library_stories');
+    return saved ? JSON.parse(saved) : INITIAL_STORIES;
+  });
   const [selectedStory, setSelectedStory] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('stories');
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
 
   // Document/Material management
-  const [materials, setMaterials] = useState<Material[]>(INITIAL_MATERIALS);
+  const [materials, setMaterials] = useState<Material[]>(() => {
+    const saved = localStorage.getItem('library_materials');
+    return saved ? JSON.parse(saved) : INITIAL_MATERIALS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('library_stories', JSON.stringify(stories));
+  }, [stories]);
+
+  useEffect(() => {
+    localStorage.setItem('library_materials', JSON.stringify(materials));
+  }, [materials]);
   const [addDocModalOpen, setAddDocModalOpen] = useState(false);
 
   // Login form state
@@ -292,17 +306,17 @@ export default function App() {
           {/* Quick Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { label: 'Tổng số sách', value: '12,450', growth: '+12 tuần này', color: 'emerald' },
-              { label: 'Số lượt mượn', value: '892', growth: 'Đang tăng', color: 'sky' },
-              { label: 'Học sinh mới', value: '128', growth: 'Tháng 5/2024', color: 'orange' },
-              { label: 'Truyện yêu thích', value: '45', growth: 'Lượt đánh giá', color: 'pink' }
+              { label: 'Tổng số sách & truyện', value: (stories.length + materials.filter(m => m.type !== 'video').length).toLocaleString(), growth: `+${stories.length} truyện mới`, color: 'emerald' },
+              { label: 'Tài liệu học tập', value: materials.filter(m => m.type !== 'video').length.toString(), growth: 'Đã cập nhật', color: 'sky' },
+              { label: 'Video bài giảng', value: materials.filter(m => m.type === 'video').length.toString(), growth: 'Giờ kể chuyện', color: 'pink' },
+              { label: 'Lượt truy cập', value: '1,205', growth: 'Tháng này', color: 'orange' }
             ].map((stat, i) => (
               <div key={i} className="bg-white p-6 rounded-2xl border border-gb-border shadow-sm hover:shadow-md transition-shadow">
                 <p className="text-gb-text-muted text-xs font-medium uppercase mb-1">{stat.label}</p>
                 <h3 className="text-3xl font-bold text-gb-text-dark">{stat.value}</h3>
                 <div className={`mt-2 flex items-center gap-1 text-${stat.color}-500`}>
                   <Zap size={12} />
-                  <span className="text-[10px] font-bold">{stat.growth}</span>
+                  <span className="text-[10px] font-bold uppercase">{stat.growth}</span>
                 </div>
               </div>
             ))}
