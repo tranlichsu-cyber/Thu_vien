@@ -82,7 +82,10 @@ const INITIAL_STORIES: Story[] = [
   { id: 14, title: 'Tại sao có sấm sét?', category: 'Khoa học', icon: 'Zap', image: 'https://images.unsplash.com/photo-1472141521881-95d0e87e2e39?auto=format&fit=crop&q=80&w=400', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/10-van-cau-hoi-vi-sao/tai-sao-co-sam-set', color: 'yellow' },
   
   // Truyện cười (Thêm category mới hoặc cho vào Văn học VN)
-  { id: 15, title: 'Lợn cưới áo mới', category: 'Văn học VN', icon: 'Leaf', image: 'https://truyenthieunhi.vn/Uploads/News/lon-cuoi-ao-moi.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-cuoi/lon-cuoi-ao-moi', color: 'sky' }
+  { id: 15, title: 'Lợn cưới áo mới', category: 'Văn học VN', icon: 'Leaf', image: 'https://truyenthieunhi.vn/Uploads/News/lon-cuoi-ao-moi.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-cuoi/lon-cuoi-ao-moi', color: 'sky' },
+  { id: 16, title: 'Trạng Quỳnh', category: 'Cổ tích', icon: 'Star', image: 'https://truyenthieunhi.vn/Uploads/News/trang-quynh.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-cuoi/trang-quynh', color: 'orange' },
+  { id: 17, title: 'Cậu bé thông minh', category: 'Cổ tích', icon: 'Star', image: 'https://truyenthieunhi.vn/Uploads/News/cau-be-thong-minh.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-co-tich/co-tich-viet-nam/cau-be-thong-minh', color: 'emerald' },
+  { id: 18, title: 'Nàng Bạch Tuyết và bảy chú lùn', category: 'Văn học nước ngoài', icon: 'Globe', image: 'https://truyenthieunhi.vn/Uploads/News/bach-tuyet.jpg', type: 'link', link: 'https://truyenthieunhi.vn/truyen-cho-tre/truyen-co-tich/co-tich-the-gioi/nang-bach-tuyet-va-7-chu-lun', color: 'pink' }
 ];
 
 const INITIAL_MATERIALS: Material[] = [
@@ -115,7 +118,7 @@ export default function App() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [addStoryModalOpen, setAddStoryModalOpen] = useState(false);
   const [stories, setStories] = useState<Story[]>(() => {
-    const saved = localStorage.getItem('library_stories_v3');
+    const saved = localStorage.getItem('library_stories_v4');
     return saved ? JSON.parse(saved) : INITIAL_STORIES;
   });
   const [selectedStory, setSelectedStory] = useState<string | null>(null);
@@ -125,16 +128,16 @@ export default function App() {
 
   // Document/Material management
   const [materials, setMaterials] = useState<Material[]>(() => {
-    const saved = localStorage.getItem('library_materials_v2');
+    const saved = localStorage.getItem('library_materials_v3');
     return saved ? JSON.parse(saved) : INITIAL_MATERIALS;
   });
 
   useEffect(() => {
-    localStorage.setItem('library_stories_v3', JSON.stringify(stories));
+    localStorage.setItem('library_stories_v4', JSON.stringify(stories));
   }, [stories]);
 
   useEffect(() => {
-    localStorage.setItem('library_materials_v2', JSON.stringify(materials));
+    localStorage.setItem('library_materials_v3', JSON.stringify(materials));
   }, [materials]);
   const [addDocModalOpen, setAddDocModalOpen] = useState(false);
 
