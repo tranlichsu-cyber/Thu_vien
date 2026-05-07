@@ -123,6 +123,8 @@ export default function App() {
   const [docLink, setDocLink] = useState('');
   const [docType, setDocType] = useState<'doc' | 'ppt' | 'video' | 'other'>('doc');
   const [docGrade, setDocGrade] = useState(1);
+  const [docMethod, setDocMethod] = useState<'link' | 'file'>('link');
+  const [uploadedFile, setUploadedFile] = useState<{ name: string; data: string } | null>(null);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -178,12 +180,14 @@ export default function App() {
 
   const handleAddMaterial = (e: React.FormEvent) => {
     e.preventDefault();
+    const materialLink = docMethod === 'file' && uploadedFile ? uploadedFile.data : (docLink || '#');
+    
     const newMaterial: Material = {
       id: Date.now(),
-      title: docTitle,
+      title: docTitle || (docMethod === 'file' && uploadedFile ? uploadedFile.name : 'Tài liệu không tên'),
       type: docType,
       grade: docType === 'video' ? 0 : docGrade,
-      link: docLink || '#',
+      link: materialLink,
       date: new Intl.DateTimeFormat('vi-VN').format(new Date())
     };
     setMaterials([...materials, newMaterial]);
@@ -191,11 +195,42 @@ export default function App() {
     setDocTitle('');
     setDocLink('');
     setDocType('doc');
+    setUploadedFile(null);
+    setDocMethod('link');
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64Data = event.target?.result as string;
+        setUploadedFile({
+          name: file.name,
+          data: base64Data
+        });
+        if (!docTitle) setDocTitle(file.name);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const deleteMaterial = (id: number) => {
     if (window.confirm("Thủ thư có chắc chắn muốn xóa tài liệu này không?")) {
       setMaterials(materials.filter(m => m.id !== id));
+    }
+  };
+
+  const handleDownload = (link: string, title: string) => {
+    if (link.startsWith('data:')) {
+      const a = document.createElement('a');
+      a.href = link;
+      a.download = title;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } else {
+      window.open(link, '_blank');
     }
   };
 
@@ -464,7 +499,7 @@ export default function App() {
                               <td className="px-6 py-4 text-right">
                                 <div className="flex justify-end gap-2">
                                   <button 
-                                    onClick={() => window.open(doc.link, '_blank')}
+                                    onClick={() => handleDownload(doc.link, doc.title)}
                                     className="p-2 text-gb-primary hover:bg-blue-50 rounded-lg transition-all"
                                     title="Tải xuống/Xem"
                                   >
@@ -532,7 +567,7 @@ export default function App() {
                         <h4 className="font-bold text-slate-800 line-clamp-1">{vid.title}</h4>
                       </div>
                       <div 
-                        onClick={() => window.open(vid.link, '_blank')}
+                        onClick={() => handleDownload(vid.link, vid.title)}
                         className="aspect-video bg-slate-900 relative flex items-center justify-center cursor-pointer overflow-hidden"
                       >
                         <img 
@@ -772,6 +807,23 @@ export default function App() {
               </div>
 
               <form onSubmit={handleAddMaterial} className="space-y-4">
+                <div className="flex bg-slate-100 p-1 rounded-xl mb-4">
+                  <button 
+                    type="button"
+                    onClick={() => setDocMethod('link')}
+                    className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${docMethod === 'link' ? 'bg-white shadow-sm text-gb-primary' : 'text-slate-400'}`}
+                  >
+                    Dùng liên kết
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setDocMethod('file')}
+                    className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${docMethod === 'file' ? 'bg-white shadow-sm text-emerald-500' : 'text-slate-400'}`}
+                  >
+                    Tải tệp từ máy
+                  </button>
+                </div>
+
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase">Tên tài liệu *</label>
                   <input 
@@ -783,16 +835,40 @@ export default function App() {
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:border-gb-primary focus:bg-white outline-none transition-all text-sm"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-500 uppercase">Liên kết (Link tải/xem)</label>
-                  <input 
-                    type="url" 
-                    value={docLink}
-                    onChange={(e) => setDocLink(e.target.value)}
-                    placeholder="https://..." 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:border-gb-primary focus:bg-white outline-none transition-all text-sm"
-                  />
-                </div>
+
+                {docMethod === 'link' ? (
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Liên kết (Link tải/xem)</label>
+                    <input 
+                      type="url" 
+                      value={docLink}
+                      onChange={(e) => setDocLink(e.target.value)}
+                      placeholder="https://..." 
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:border-gb-primary focus:bg-white outline-none transition-all text-sm"
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Chọn tệp (.docx, .pdf, .ppt)</label>
+                    <div className="relative">
+                      <input 
+                        type="file" 
+                        onChange={handleFileChange}
+                        accept=".doc,.docx,.pdf,.ppt,.pptx"
+                        className="opacity-0 absolute inset-0 w-full h-full cursor-pointer z-10"
+                      />
+                      <div className="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl px-4 py-6 flex flex-col items-center justify-center gap-2 group-hover:border-emerald-500 transition-all">
+                        <PlusCircle size={24} className="text-slate-300" />
+                        <span className="text-xs font-bold text-slate-400">
+                          {uploadedFile ? uploadedFile.name : 'Nhấn để chọn tệp hoặc kéo thả'}
+                        </span>
+                        {uploadedFile && (
+                          <span className="text-[10px] text-emerald-500 font-bold uppercase">Tệp đã sẵn sàng</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-500 uppercase">Loại tài liệu</label>
