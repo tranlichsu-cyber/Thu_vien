@@ -302,7 +302,10 @@ export default function App() {
     
     // Check if it's a PDF or Flipbook and should be viewed in-app
     const isPdf = link.startsWith('data:application/pdf') || link.toLowerCase().endsWith('.pdf') || type === 'pdf';
-    const isFlipbook = type === 'flipbook' || link.includes('flip') || link.includes('book');
+    
+    // Only use internal viewer for PDF or explicit flipbook type
+    // If it's a general link containing 'flip' or 'book', we only auto-view if type is flipbook
+    const isFlipbook = type === 'flipbook';
     
     if ((isPdf || isFlipbook) && !link.includes('download=true') && link !== '#') {
       setViewingPdf({ url: link, title });
@@ -1176,6 +1179,13 @@ export default function App() {
                     title="Tải về máy"
                   >
                     <Download size={20} />
+                  </button>
+                  <button 
+                    onClick={() => window.open(viewingPdf.url, '_blank')}
+                    className="p-2 text-slate-400 hover:text-gb-primary hover:bg-blue-50 rounded-xl transition-all"
+                    title="Mở trong tab mới (Nếu không xem được tại đây)"
+                  >
+                    <Globe size={20} />
                   </button>
                   <button 
                     onClick={() => setPdfViewerOpen(false)}
