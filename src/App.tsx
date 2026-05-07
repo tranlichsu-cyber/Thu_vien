@@ -60,8 +60,8 @@ interface Material {
 // --- Constants ---
 const INITIAL_STORIES: Story[] = [
   { id: 1, title: 'Sự Tích Hồ Gươm', category: 'Cổ tích', icon: 'Star', image: 'https://images.unsplash.com/photo-1599708153386-62e2d3639963?auto=format&fit=crop&q=80&w=400', type: 'link', link: 'https://gemini.google.com/share/c5d023fb21ed', color: 'orange' },
-  { id: 2, title: 'Dế Mèn Phiêu Lưu Ký (PDF)', category: 'Truyện PDF', icon: 'Leaf', image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400', type: 'link', link: '#', color: 'emerald' },
-  { id: 3, title: 'Hoàng Tử Bé (Sách lật)', category: 'Truyện sách lật', icon: 'BookOpen', image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=400', type: 'link', link: '#', color: 'sky' }
+  { id: 2, title: 'Dế Mèn Phiêu Lưu Ký (PDF)', category: 'Truyện PDF', icon: 'Leaf', image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400', type: 'pdf', link: 'https://www.adobe.com/support/products/enterprise/knowledgecenter/whitepapers/pdf/modern_publishing_with_pdf.pdf', color: 'emerald' },
+  { id: 3, title: 'Hoàng Tử Bé (Sách lật)', category: 'Truyện sách lật', icon: 'BookOpen', image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=400', type: 'flipbook', link: 'https://mag.fliphtml5.com/quku/tmfk/', color: 'sky' }
 ];
 
 const INITIAL_MATERIALS: Material[] = [
@@ -297,13 +297,14 @@ export default function App() {
   const [pdfViewerOpen, setPdfViewerOpen] = useState(false);
   const [viewingPdf, setViewingPdf] = useState<{ url: string; title: string } | null>(null);
 
-  const handleDownload = (link: string, title: string) => {
+  const handleDownload = (link: string, title: string, type?: string) => {
     recordInteraction();
     
-    // Check if it's a PDF and should be viewed in-app
-    const isPdf = link.startsWith('data:application/pdf') || link.toLowerCase().endsWith('.pdf');
+    // Check if it's a PDF or Flipbook and should be viewed in-app
+    const isPdf = link.startsWith('data:application/pdf') || link.toLowerCase().endsWith('.pdf') || type === 'pdf';
+    const isFlipbook = type === 'flipbook' || link.includes('flip') || link.includes('book');
     
-    if (isPdf && !link.includes('download=true')) {
+    if ((isPdf || isFlipbook) && !link.includes('download=true') && link !== '#') {
       setViewingPdf({ url: link, title });
       setPdfViewerOpen(true);
       return;
@@ -557,8 +558,8 @@ export default function App() {
                       layout
                       whileHover={{ y: -4 }}
                       onClick={() => {
-                        if (story.type === 'link' || story.type === 'pdf') {
-                          handleDownload(story.link, story.title);
+                        if (story.type === 'link' || story.type === 'pdf' || story.type === 'flipbook') {
+                          handleDownload(story.link, story.title, story.type);
                         } else {
                           handleStoryOpen(story.title);
                         }
@@ -579,7 +580,7 @@ export default function App() {
                         <div className="absolute inset-0 bg-gb-sidebar/0 group-hover:bg-gb-sidebar/60 transition-all flex flex-col items-center justify-center p-4">
                           <Rocket className="text-white w-10 h-10 mb-2 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all" />
                           <span className="text-white text-xs font-bold opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all text-center">
-                            {story.type === 'pdf' ? 'Đọc truyện PDF' : (story.type === 'link' ? 'Mở liên kết' : 'Xem nội dung')}
+                            {story.type === 'pdf' ? 'Đọc truyện PDF' : (story.type === 'flipbook' ? 'Xem sách lật' : (story.type === 'link' ? 'Mở liên kết' : 'Xem nội dung'))}
                           </span>
                         </div>
                       </div>
